@@ -73,11 +73,31 @@ WSGI_APPLICATION = "supa_auth_demo.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "postgres",
+#         "USER": "postgres.gxbksifwimybbhhzcapw",
+#         "PASSWORD": "9vgAb7knFuqpl1TQ",  # Replace with your Supabase password
+#         "HOST": "aws-0-ap-south-1.pooler.supabase.com",
+#         "PORT": "6543",
+#     }
+# }
+import dj_database_url
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default="postgresql://postgres:9vgAb7knFuqpl1TQ@db.gxbksifwimybbhhzcapw.supabase.co:5432/postgres",
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
 
 
@@ -119,7 +139,10 @@ STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 SUPABASE_URL = "https://gxbksifwimybbhhzcapw.supabase.co"

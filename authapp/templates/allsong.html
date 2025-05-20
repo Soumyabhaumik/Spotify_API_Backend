@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>All Songs</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(to right, #06b6d4, #3b82f6);
+        color: white;
+        margin: 0;
+        padding: 40px;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 40px;
+        font-size: 2.5rem;
+      }
+
+      .song-list {
+        max-width: 800px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .song {
+        padding: 15px;
+        margin-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .song:last-child {
+        border-bottom: none;
+      }
+
+      .title {
+        font-size: 1.2rem;
+        font-weight: bold;
+      }
+
+      .artist {
+        font-size: 1rem;
+        color: #e0f2fe;
+      }
+
+      audio {
+        margin-top: 10px;
+        width: 100%;
+      }
+
+      .back-btn {
+        display: inline-block;
+        margin-top: 30px;
+        background-color: #ef4444;
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: bold;
+        transition: background 0.3s ease;
+      }
+
+      .back-btn:hover {
+        background-color: #dc2626;
+      }
+
+      .btn-container {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>All Songs</h1>
+
+    <div class="song-list">
+      {% for song in songs %}
+      <div class="song">
+        <div class="title">{{ song.title }}</div>
+        <div class="artist">by {{ song.artist }}</div>
+        {% if song.file_url %}
+        <audio controls>
+          <source src="{{ song.file_url }}" type="audio/mpeg" />
+          Your browser does not support the audio element.
+        </audio>
+        {% else %}
+        <p><em>No audio available</em></p>
+        {% endif %}
+      </div>
+      {% empty %}
+      <p>No songs available.</p>
+      {% endfor %}
+    </div>
+
+    <div class="btn-container">
+      <a class="back-btn" href="{% url 'auth:home' %}">Back to Home</a>
+    </div>
+  </body>
+</html>

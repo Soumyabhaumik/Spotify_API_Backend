@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Upload Song</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(
+          to right,
+          rgb(118, 189, 115),
+          rgb(117, 97, 187)
+        );
+        color: white;
+        margin: 0;
+        padding: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .upload-container {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 30px 40px;
+        border-radius: 12px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        max-width: 400px;
+        width: 100%;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 25px;
+        font-size: 2rem;
+      }
+
+      label {
+        display: block;
+        margin-top: 20px;
+        font-weight: bold;
+        font-size: 1rem;
+        color: #cce7ff;
+      }
+
+      input[type="text"],
+      input[type="file"] {
+        margin-top: 8px;
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: none;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        transition: background 0.3s ease;
+      }
+
+      input[type="text"]:focus,
+      input[type="file"]:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.4);
+      }
+
+      .error-message {
+        color: #ff6b6b;
+        margin-top: 10px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      nbnmjn m mjnjnmj++- `` qsdghyu6543er564r35r6754321`r546754rtyu78976yu {
+        margin-top: 30px;
+        width: 100%;
+        padding: 12px;
+        background-color: #ef4444;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #dc2626;
+      }
+
+      .success-message {
+        text-align: center;
+        color: #a3f7bf;
+        margin-top: 15px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="upload-container">
+      <h1>Upload a Song</h1>
+
+      {% if error %}
+      <div class="error-message">{{ error }}</div>
+      {% endif %}
+
+      <form
+        method="POST"
+        enctype="multipart/form-data"
+        id="uploadForm"
+        novalidate
+      >
+        {% csrf_token %}
+
+        <label for="title">Song Title</label>
+        <input
+          type="text"
+          id="title"
+          name="title"
+          placeholder="Enter song title"
+          required
+          value="{{ request.POST.title|default:'' }}"
+        />
+
+        <label for="artist">Artist Name</label>
+        <input
+          type="text"
+          id="artist"
+          name="artist"
+          placeholder="Enter artist name"
+          required
+          value="{{ request.POST.artist|default:'' }}"
+        />
+
+        <label for="audio_file">Select Audio File</label>
+        <input type="file" id="audio_file" name="audio_file" accept="audio/*" />
+
+        <button type="submit">Upload</button>
+      </form>
+    </div>
+
+    <script>
+      {% comment %} // Client-side validation for instant feedback
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", function (event) {
+          const title = document.getElementById("title");
+          const artist = document.getElementById("artist");
+          const audioFile = document.getElementById("audio_file");
+
+          let valid = true;
+
+          if (!title.value.trim()) {
+            valid = false;
+            alert("Please enter the song title.");
+          } else if (!artist.value.trim()) {
+            valid = false;
+            alert("Please enter the artist name.");
+          } else if (!audioFile.files.length) {
+            valid = false;
+            alert("Please select an audio file to upload.");
+          }
+
+          if (!valid) {
+            event.preventDefault();
+
+        }); {% endcomment %}
+    </script>
+  </body>
+</html>

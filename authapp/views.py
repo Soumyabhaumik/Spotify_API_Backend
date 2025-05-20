@@ -7,6 +7,8 @@ from supabase import create_client, Client
 from django.contrib import messages
 import logging
 from django.core.handlers.wsgi import WSGIRequest
+from .models import Song
+import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -115,71 +117,6 @@ def google_login(request):
         logger.error(error_message)
         messages.error(request, error_message)
         return redirect("auth:login")  # Redirect to login page on error
-
-
-# def google_callback(request):
-#     """
-#     Handles the callback from Google OAuth.
-#     """
-#     # Debug: See what data comes back from Google
-#     # Get the code from the query parameters
-
-#     print
-#     ("Request Method:", request.method)
-#     # Debug: Check the request method
-
-#     print
-#     ("Request GET:", request.GET)
-#     # Debug: See what data comes back from Google
-
-#     print
-#     ("Request Body:", request.body)
-#     code = request.GET.get("code")
-#     if not code:
-#         error_message = "Authorization code not provided."
-#         logger.error(error_message)
-#         messages.error(request, error_message)
-#         return redirect("auth:login")
-
-#     try:
-#         # Exchange the code for a session. This is the corrected method call.
-#         response = supabase.auth.exchange_code_for_session(code)
-
-#         # Now we can get the session and user
-#         session = response.session
-#         print(session)
-#         user = response.user
-
-#         if session:
-#             # Store session data in Django's session
-#             request.session["user"] = user.email
-#             request.session["jwt"] = session.access_token
-#             # metadata = user.user_metadata
-#             # if isinstance(metadata, str):
-#             #     try:
-#             #         metadata = json.loads(metadata)
-#             #     except json.JSONDecodeError:
-#             #         metadata = {}
-#             # elif not isinstance(metadata, dict):
-#             #     metadata = {}
-
-#             # name = metadata.get("name", "")
-#             name = "dkjbsbvisrv"
-#             request.session["name"] = name
-#             request.session.save()
-#             messages.success(request, "Successfully logged in with Google!")
-#             return redirect("auth:home")
-#         else:
-#             error_message = "Failed to retrieve session after exchanging code."
-#             logger.error(error_message)
-#             messages.error(request, error_message)
-#             return redirect("auth:login")
-
-#     except Exception as e:
-#         error_message = f"Error during code exchange: {str(e)}"
-#         logger.error(error_message)
-#         messages.error(request, error_message)
-#         return redirect("auth:login")
 
 
 @csrf_exempt
@@ -364,3 +301,78 @@ def logout_view(request):
         return JsonResponse({"message": f"{user_email} is successfully logged out"})
 
     return redirect("auth:login")  # Use named URL
+
+
+def song_list(request, pk=None):
+    """
+    List all songs, create a new song, retrieve a single song,
+    update a song, or delete a song.
+    """
+    return None
+
+
+def all_songs_view(request):
+    """
+    View to display all songs.
+    """
+    try:
+        # Fetch songs from Supabase "songs" table
+        response = supabase.table("songs").select("*").execute()
+        songs = response.data
+    except Exception as e:
+        songs = []
+        print(f"Error fetching songs: {e}")
+
+    return render(request, "allsong.html", {"songs": songs})
+
+
+def upload_song(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        artist = request.POST.get("artist")
+        audio_file = request.FILES.get("audio_file")
+
+        if not all([title, artist, audio_file]):
+            return render(request, "upload.html", {"error": "All fields are required."})
+
+        # Generate a unique filename
+        timestamp = datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        file_name = f"{timestamp}_{audio_file.name}"
+
+        # Read bytes from the uploaded file
+        audio_bytes = audio_file.read()
+
+        # Upload to Supabase storage
+        try:
+            upload_response = supabase.storage.from_("songs").upload(
+                path=file_name,
+                file=audio_bytes,  # Send bytes instead of file object
+                file_options={"content-type": audio_file.content_type},
+            )
+            if upload_response.get("error"):
+                raise Exception(upload_response["error"])
+        except Exception as e:
+            return render(
+                request,
+                "upload.html",
+                {"error": f"Failed to upload file: {str(e)}"},
+            )
+
+        # Construct the public URL
+        file_url = f"{settings.SUPABASE_URL}/storage/v1/object/public/songs/{file_name}"
+
+        # Insert metadata into Supabase DB
+        try:
+            supabase.table("songs").insert(
+                {"title": title, "artist": artist, "file_url": file_url}
+            ).execute()
+        except Exception as e:
+            return render(
+                request,
+                "upload.html",
+                {"error": f"Failed to save metadata: {str(e)}"},
+            )
+
+        return redirect("auth:all_songs")
+
+    return render(request, "upload.html")
